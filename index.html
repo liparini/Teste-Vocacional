@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teste Vocacional</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #A8DADC, #457B9D);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      color: #1D3557;
+    }
+    h1 {
+      margin-top: 20px;
+      color: #1D3557;
+    }
+    .container {
+      max-width: 800px;
+      width: 100%;
+      padding: 20px;
+      background: #F1FAEE;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      margin: 20px;
+      text-align: center;
+    }
+    .question {
+      font-size: 1.4em;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+    .options button {
+      background-color: #457B9D;
+      border: none;
+      color: white;
+      padding: 15px 25px;
+      margin: 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1.1em;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      min-width: 180px;
+    }
+    .options button:hover {
+      background-color: #1D3557;
+      transform: scale(1.05);
+    }
+    .result h2 {
+      color: #1D3557;
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+    .result img {
+      width: 100%;
+      max-width: 320px;
+      border-radius: 12px;
+      margin: 20px 0;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+    }
+    .profissoes span {
+      display: inline-block;
+      background-color: #A8DADC;
+      margin: 6px;
+      padding: 12px 18px;
+      border-radius: 12px;
+      position: relative;
+      cursor: help;
+      transition: background 0.3s ease;
+      font-weight: 600;
+      color: #1D3557;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      user-select: none;
+    }
+    .profissoes span:hover {
+      background-color: #457B9D;
+      color: #F1FAEE;
+    }
+    .tooltip {
+      visibility: hidden;
+      background-color: #1D3557;
+      color: #F1FAEE;
+      text-align: center;
+      border-radius: 8px;
+      padding: 8px 12px;
+      position: absolute;
+      z-index: 10;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      width: 180px;
+      font-size: 0.9em;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .profissoes span:hover .tooltip {
+      visibility: visible;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #restart {
+      margin-top: 25px;
+      padding: 12px 28px;
+      font-size: 1.1em;
+      background-color: #1D3557;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      transition: background-color 0.3s ease;
+    }
+    #restart:hover {
+      background-color: #457B9D;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="quiz">
+    <h1>Teste Vocacional</h1>
+    <div id="pergunta" class="question"></div>
+    <div id="respostas" class="options"></div>
+  </div>
+
+  <div class="container result" id="resultado" style="display:none">
+    <h2 id="tituloResultado"></h2>
+    <img id="imgResultado" src="" alt="Área relacionada" />
+    <div class="profissoes" id="listaProfissoes"></div>
+    <button id="restart" onclick="reiniciarTeste()">Reiniciar Teste</button>
+  </div>
+
+  <script>
+    const perguntas = [
+      {
+        texto: "O que você mais gosta de fazer no seu tempo livre?",
+        opcoes: [
+          { texto: "Resolver desafios e quebra-cabeças", area: "Exatas" },
+          { texto: "Conversar sobre ideias, histórias e pessoas", area: "Humanas" },
+          { texto: "Observar a natureza e entender o corpo humano", area: "Biológicas" },
+          { texto: "Desenhar, pintar, criar artes visuais", area: "Artes e Design" },
+          { texto: "Tocar instrumentos, cantar ou criar músicas", area: "Artística-Musical" }
+        ]
+      },
+      {
+        texto: "Qual dessas matérias você curte mais na escola?",
+        opcoes: [
+          { texto: "Matemática ou Física", area: "Exatas" },
+          { texto: "História ou Filosofia", area: "Humanas" },
+          { texto: "Biologia ou Química", area: "Biológicas" },
+          { texto: "Artes ou Desenho", area: "Artes e Design" },
+          { texto: "Música ou Educação Musical", area: "Artística-Musical" }
+        ]
+      },
+      {
+        texto: "Se você fosse fazer um trabalho em grupo, qual papel escolheria?",
+        opcoes: [
+          { texto: "Fazer cálculos e organizar dados", area: "Exatas" },
+          { texto: "Pesquisar e explicar as ideias", area: "Humanas" },
+          { texto: "Cuidar da parte científica", area: "Biológicas" },
+          { texto: "Criar a identidade visual e design", area: "Artes e Design" },
+          { texto: "Criar trilhas sonoras e jingles", area: "Artística-Musical" }
+        ]
+      }
+    ];
+
+    const profissoes = {
+      "Exatas": [
+        ["Engenheiro Civil", "Projeta e acompanha obras de infraestrutura."],
+        ["Analista de Sistemas", "Desenvolve sistemas e soluções digitais."],
+        ["Matemático", "Trabalha com cálculos, modelos e análises."],
+        ["Estatístico", "Analisa dados e interpreta informações."],
+        ["Físico", "Estuda fenômenos naturais e fórmulas."],
+        ["Engenheiro de Software", "Cria programas e aplicativos."],
+        ["Engenheiro Elétrico", "Trabalha com sistemas elétricos."],
+        ["Programador", "Cria códigos para soluções tecnológicas."],
+        ["Arquiteto", "Projeta espaços urbanos e edifícios."],
+        ["Cientista de Dados", "Analisa grandes volumes de dados."],
+        ["Engenheiro Mecânico", "Projeta máquinas e dispositivos."],
+        ["Economista", "Analisa mercados e tendências econômicas."],
+        ["Engenheiro de Produção", "Otimiza processos industriais."],
+        ["Piloto", "Comanda aviões e aeronaves."],
+        ["Astrônomo", "Estuda o universo e astros."],
+        ["Geólogo", "Estuda a composição da Terra e seus processos."],
+        ["Engenheiro Ambiental", "Cuida do meio ambiente em projetos."],
+        ["Desenvolvedor de Jogos", "Cria jogos digitais para entretenimento."],
+        ["Matemático Aplicado", "Aplica matemática para resolver problemas reais."],
+        ["Especialista em Robótica", "Desenvolve máquinas inteligentes."]
+      ],
+      "Humanas": [
+        ["Professor de História", "Ensina a evolução da humanidade."],
+        ["Advogado", "Defende causas e interpreta leis."],
+        ["Jornalista", "Escreve e investiga notícias."],
+        ["Sociólogo", "Estuda a sociedade e seus comportamentos."],
+        ["Psicólogo", "Trabalha com a mente humana."],
+        ["Filósofo", "Reflete sobre a existência e ética."],
+        ["Publicitário", "Cria campanhas e anúncios."],
+        ["Cientista Político", "Estuda o sistema político e eleitoral."],
+        ["Relações Públicas", "Cuida da imagem pública de empresas."],
+        ["Historiador", "Pesquisa e registra fatos do passado."],
+        ["Antropólogo", "Estuda culturas e origens humanas."],
+        ["Linguista", "Estuda os idiomas e suas estruturas."],
+        ["Editor", "Trabalha com revisão e publicação de textos."],
+        ["Tradutor", "Converte textos entre idiomas."],
+        ["Guia Turístico", "Conduz pessoas em roteiros culturais."],
+        ["Assistente Social", "Ajuda pessoas e comunidades."],
+        ["Psicopedagogo", "Apoia processos de aprendizagem."],
+        ["Mediador", "Resolve conflitos entre pessoas ou grupos."],
+        ["Escritor", "Cria histórias e textos literários."],
+        ["Analista de Políticas Públicas", "Avalia programas governamentais."]
+      ],
+      "Biológicas": [
+        ["Médico", "Cuida da saúde das pessoas."],
+        ["Enfermeiro", "Atende e acompanha pacientes."],
+        ["Biólogo", "Estuda os seres vivos."],
+        ["Farmacêutico", "Trabalha com medicamentos."],
+        ["Veterinário", "Cuida da saúde animal."],
+        ["Nutricionista", "Planeja dietas e alimentação."],
+        ["Fisioterapeuta", "Trabalha com reabilitação física."],
+        ["Dentista", "Cuida da saúde bucal."],
+        ["Psicólogo", "Trata distúrbios mentais."],
+        ["Pesquisador", "Desenvolve estudos científicos."],
+        ["Técnico em Análises Clínicas", "Realiza exames laboratoriais."],
+        ["Biomédico", "Trabalha com diagnósticos laboratoriais."],
+        ["Zootecnista", "Trabalha com produção animal."],
+        ["Geneticista", "Estuda hereditariedade e genes."],
+        ["Fonoaudiólogo", "Trabalha com voz e audição."],
+        ["Oceanógrafo", "Estuda oceanos e ambientes marinhos."],
+        ["Ecólogo", "Analisa relações entre organismos e ambiente."],
+        ["Microbiologista", "Estuda microrganismos e seus efeitos."],
+        ["Farmacologista", "Estuda os efeitos de remédios no corpo."],
+        ["Biotecnólogo", "Usa biologia para criar tecnologias."]
+      ],
+      "Artes e Design": [
+        ["Designer Gráfico", "Cria imagens e layouts visuais."],
+        ["Ilustrador", "Desenha personagens e cenas."],
+        ["Arquiteto", "Projeta construções com estética."],
+        ["Artista Visual", "Cria obras de arte visuais."],
+        ["Fotógrafo", "Captura imagens com criatividade."],
+        ["Cineasta", "Produz filmes e vídeos."],
+        ["Animador", "Cria animações digitais."],
+        ["Web Designer", "Desenvolve sites atrativos."],
+        ["Designer de Moda", "Cria roupas e estilos."],
+        ["Maquiador Artístico", "Cria looks criativos."],
+        ["Pintor", "Produz obras em tinta."],
+        ["Cenógrafo", "Cria cenários para eventos e TV."],
+        ["Escultor", "Molda obras em três dimensões."],
+        ["Grafiteiro", "Faz arte urbana em murais."],
+        ["Youtuber Criativo", "Cria conteúdo artístico para web."],
+        ["Diretor de Arte", "Coordena a parte visual de projetos."],
+        ["Iluminador", "Trabalha com iluminação para cenas."],
+        ["Designer de Produto", "Cria objetos funcionais e bonitos."],
+        ["Designer de Interiores", "Planeja ambientes internos."],
+        ["Storyboarder", "Cria roteiros visuais para filmes e animações."]
+      ],
+      "Artística-Musical": [
+        ["Músico", "Toca instrumentos ou canta."],
+        ["Compositor", "Cria letras e melodias."],
+        ["Produtor Musical", "Grava e edita músicas."],
+        ["Maestro", "Comanda orquestras."],
+        ["DJ", "Cria mixagens e trilhas."],
+        ["Cantor", "Interpreta músicas."],
+        ["Luthier", "Constrói instrumentos."],
+        ["Técnico de Som", "Opera equipamentos de áudio."],
+        ["Educador Musical", "Ensina música nas escolas."],
+        ["Compositor de Trilhas", "Cria músicas para filmes e jogos."],
+        ["Musicoterapeuta", "Trabalha com cura via música."],
+        ["Regente", "Lidera corais e bandas."],
+        ["Arranjador", "Adapta músicas para bandas."],
+        ["Instrumentista", "Especialista em instrumentos."],
+        ["Crítico Musical", "Analisa performances musicais."],
+        ["Produtor de Eventos", "Organiza shows e festivais."],
+        ["Técnico de Gravação", "Cuida da captação de áudio."],
+        ["Cantor Gospel", "Interpreta músicas religiosas."],
+        ["Dançarino", "Performances artísticas com dança."],
+        ["Coreógrafo", "Cria coreografias para shows e teatro."]
+      ]
+    };
+
+    let indice = 0;
+    let respostas = [];
+
+    function mostrarPergunta() {
+      const pergunta = perguntas[indice];
+      document.getElementById("pergunta").innerText = pergunta.texto;
+      const containerRespostas = document.getElementById("respostas");
+      containerRespostas.innerHTML = "";
+      pergunta.opcoes.forEach(opcao => {
+        const botao = document.createElement("button");
+        botao.innerText = opcao.texto;
+        botao.onclick = () => escolher(opcao.area);
+        containerRespostas.appendChild(botao);
+      });
+    }
+
+    function escolher(area) {
+      respostas.push(area);
+      indice++;
+      if (indice < perguntas.length) {
+        mostrarPergunta();
+      } else {
+        mostrarResultado();
+      }
+    }
+
+    function mostrarResultado() {
+      document.getElementById("quiz").style.display = "none";
+      document.getElementById("resultado").style.display = "block";
+
+      const contagem = respostas.reduce((acc, area) => {
+        acc[area] = (acc[area] || 0) + 1;
+        return acc;
+      }, {});
+
+      const areaFinal = Object.entries(contagem).sort((a,b) => b[1]-a[1])[0][0];
+
+      document.getElementById("tituloResultado").innerText = `🌟 Sua vocação está em: ${areaFinal}!`;
+
+      // Caminho local da imagem
+     const areaToImagem = {
+  "Exatas": "exatas.jpg",
+  "Humanas": "humanas.jpg",
+  "Biológicas": "biologicas.jpg",
+  "Artes e Design": "artesedesign.jpg",
+  "Artística-Musical": "artisticamusical.jpg"
+};
+const imagemPath = `imagens/${areaToImagem[areaFinal]}`;
+
+
+      const imgResultado = document.getElementById("imgResultado");
+      imgResultado.src = imagemPath;
+      imgResultado.alt = `Imagem relacionada à área ${areaFinal}`;
+
+      const lista = document.getElementById("listaProfissoes");
+      lista.innerHTML = "";
+      profissoes[areaFinal].forEach(([nome, desc]) => {
+        const span = document.createElement("span");
+        span.innerText = nome;
+        const tooltip = document.createElement("div");
+        tooltip.className = "tooltip";
+        tooltip.innerText = desc;
+        span.appendChild(tooltip);
+        lista.appendChild(span);
+      });
+    }
+
+    function reiniciarTeste() {
+      indice = 0;
+      respostas = [];
+      document.getElementById("quiz").style.display = "block";
+      document.getElementById("resultado").style.display = "none";
+      mostrarPergunta();
+    }
+
+    mostrarPergunta();
+  </script>
+</body>
+</html>
