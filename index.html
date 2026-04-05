@@ -1,365 +1,607 @@
+
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Teste Vocacional</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to right, #A8DADC, #457B9D);
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      color: #1D3557;
-    }
-    h1 {
-      margin-top: 20px;
-      color: #1D3557;
-    }
-    .container {
-      max-width: 800px;
-      width: 100%;
-      padding: 20px;
-      background: #F1FAEE;
-      border-radius: 15px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
-      margin: 20px;
-      text-align: center;
-    }
-    .question {
-      font-size: 1.4em;
-      margin-bottom: 20px;
-      font-weight: 700;
-    }
-    .options button {
-      background-color: #457B9D;
-      border: none;
-      color: white;
-      padding: 15px 25px;
-      margin: 10px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 1.1em;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      min-width: 180px;
-    }
-    .options button:hover {
-      background-color: #1D3557;
-      transform: scale(1.05);
-    }
-    .result h2 {
-      color: #1D3557;
-      font-size: 2em;
-      margin-bottom: 10px;
-    }
-    .result img {
-      width: 100%;
-      max-width: 320px;
-      border-radius: 12px;
-      margin: 20px 0;
-      box-shadow: 0 8px 15px rgba(0,0,0,0.15);
-    }
-    .profissoes span {
-      display: inline-block;
-      background-color: #A8DADC;
-      margin: 6px;
-      padding: 12px 18px;
-      border-radius: 12px;
-      position: relative;
-      cursor: help;
-      transition: background 0.3s ease;
-      font-weight: 600;
-      color: #1D3557;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-      user-select: none;
-    }
-    .profissoes span:hover {
-      background-color: #457B9D;
-      color: #F1FAEE;
-    }
-    .tooltip {
-      visibility: hidden;
-      background-color: #1D3557;
-      color: #F1FAEE;
-      text-align: center;
-      border-radius: 8px;
-      padding: 8px 12px;
-      position: absolute;
-      z-index: 10;
-      bottom: 125%;
-      left: 50%;
-      transform: translateX(-50%);
-      opacity: 0;
-      width: 180px;
-      font-size: 0.9em;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      transition: opacity 0.3s ease;
-      pointer-events: none;
-    }
-    .profissoes span:hover .tooltip {
-      visibility: visible;
-      opacity: 1;
-      pointer-events: auto;
-    }
-    #restart {
-      margin-top: 25px;
-      padding: 12px 28px;
-      font-size: 1.1em;
-      background-color: #1D3557;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-      transition: background-color 0.3s ease;
-    }
-    #restart:hover {
-      background-color: #457B9D;
-    }
-  </style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:transparent}
+.app{max-width:680px;margin:0 auto;padding:1rem}
+
+.screen{display:none}
+.screen.active{display:block}
+
+/* WELCOME */
+.hero{text-align:center;padding:2rem 0.5rem}
+.hero-emoji{font-size:56px;display:block;margin-bottom:1rem;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.hero h1{font-size:clamp(22px,5vw,30px);font-weight:500;color:var(--color-text-primary);margin-bottom:.5rem}
+.hero p{font-size:15px;color:var(--color-text-secondary);max-width:440px;margin:0 auto 2rem;line-height:1.6}
+.start-btn{display:inline-block;background:#6366F1;color:#fff;border:none;border-radius:999px;padding:15px 40px;font-size:16px;font-weight:500;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 20px rgba(99,102,241,.35)}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(99,102,241,.45)}
+.feat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:2rem 0}
+.feat{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:14px;text-align:center}
+.feat span{font-size:22px;display:block;margin-bottom:6px}
+.feat p{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+
+/* PROGRESS */
+.prog-wrap{margin-bottom:1.5rem}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.prog-label{font-size:12px;color:var(--color-text-secondary)}
+.prog-cat{font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px;color:#fff}
+.prog-bar{height:6px;background:var(--color-background-secondary);border-radius:999px;overflow:hidden}
+.prog-fill{height:100%;border-radius:999px;transition:width .4s ease}
+
+/* QUESTION */
+.q-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:16px;padding:1.5rem;margin-bottom:1rem}
+.q-num{font-size:11px;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.q-text{font-size:16px;font-weight:500;color:var(--color-text-primary);line-height:1.6;margin-bottom:1.25rem}
+
+/* COLOR BUTTONS */
+.opts-grid{display:flex;flex-direction:column;gap:8px}
+.opt-btn{
+  width:100%;text-align:left;padding:14px 18px;border:none;border-radius:12px;
+  cursor:pointer;font-size:14px;font-weight:500;line-height:1.5;
+  transition:transform .12s, box-shadow .12s, filter .12s;
+  color:#fff;position:relative;overflow:hidden;
+}
+.opt-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.18);filter:brightness(1.06)}
+.opt-btn.selected{transform:scale(0.98);box-shadow:inset 0 2px 8px rgba(0,0,0,.25)!important}
+.opt-btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:background .12s}
+.opt-btn.selected::after{background:rgba(0,0,0,.12)}
+
+/* Scale */
+.scale-row{display:flex;gap:8px}
+.scale-btn{
+  flex:1;padding:14px 6px;text-align:center;border:none;border-radius:12px;
+  cursor:pointer;font-size:15px;font-weight:500;color:#fff;
+  transition:transform .12s, box-shadow .12s;
+}
+.scale-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.scale-btn.selected{transform:scale(0.95);box-shadow:inset 0 2px 8px rgba(0,0,0,.25)}
+.scale-labs{display:flex;justify-content:space-between;font-size:11px;color:var(--color-text-secondary);margin-top:6px;padding:0 2px}
+
+.nav-row{display:flex;gap:10px;justify-content:space-between}
+.btn-back{background:transparent;border:1px solid var(--color-border-tertiary);border-radius:999px;padding:11px 22px;font-size:14px;color:var(--color-text-secondary);cursor:pointer;transition:border-color .15s}
+.btn-back:hover{border-color:#6366F1;color:#6366F1}
+.btn-next{background:#6366F1;color:#fff;border:none;border-radius:999px;padding:12px 28px;font-size:14px;font-weight:500;cursor:pointer;opacity:.4;pointer-events:none;transition:opacity .15s,transform .15s}
+.btn-next.on{opacity:1;pointer-events:all}
+.btn-next.on:hover{transform:translateY(-1px)}
+
+/* LOADING */
+.load-center{text-align:center;padding:3rem 1rem}
+.spinner{width:48px;height:48px;border:3px solid var(--color-border-tertiary);border-top-color:#6366F1;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1.5rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-steps{display:flex;flex-direction:column;gap:8px;max-width:260px;margin:1.5rem auto 0;text-align:left}
+.load-step{font-size:13px;color:var(--color-text-secondary);display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--color-border-tertiary)}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--color-border-tertiary);flex-shrink:0;transition:background .3s}
+.sdot.ok{background:#10B981}
+
+/* RESULTS */
+.profile-hero{border-radius:20px;padding:1.75rem;color:#fff;margin-bottom:1.25rem;position:relative;overflow:hidden}
+.profile-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.08)}
+.profile-hero::after{content:'';position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.06)}
+.ph-sub{font-size:11px;opacity:.75;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+.ph-name{font-size:clamp(20px,4vw,26px);font-weight:500;margin-bottom:8px}
+.ph-desc{font-size:14px;opacity:.9;line-height:1.65}
+
+.sec-title{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:12px;padding-bottom:8px;border-bottom:.5px solid var(--color-border-tertiary)}
+.sec{margin-bottom:1.5rem}
+
+.apt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.apt-card{background:var(--color-background-secondary);border:.5px solid var(--color-border-tertiary);border-radius:12px;padding:14px;text-align:center}
+.apt-pct{font-size:22px;font-weight:500;margin-bottom:3px}
+.apt-lbl{font-size:11px;color:var(--color-text-secondary)}
+.apt-bar{height:4px;background:var(--color-border-tertiary);border-radius:999px;margin-top:8px;overflow:hidden}
+.apt-fill{height:100%;border-radius:999px}
+
+.career-list{display:flex;flex-direction:column;gap:10px}
+.career-card{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:14px;padding:1rem 1.25rem;display:flex;align-items:flex-start;gap:12px}
+.ci{font-size:28px;flex-shrink:0;margin-top:2px}
+.cn{font-size:15px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px}
+.cd{font-size:13px;color:var(--color-text-secondary);line-height:1.5}
+.ctags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.ctag{font-size:11px;padding:2px 9px;border-radius:999px;background:var(--color-background-secondary);color:var(--color-text-secondary);border:.5px solid var(--color-border-tertiary)}
+.match{font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px;flex-shrink:0}
+.mh{background:#D1FAE5;color:#065F46}
+.mm{background:#FEF3C7;color:#92400E}
+
+.insight{background:var(--color-background-secondary);border:.5px solid var(--color-border-tertiary);border-radius:10px;padding:14px 16px;margin-bottom:8px;border-left:3px solid #6366F1}
+.ins-lbl{font-size:11px;font-weight:500;color:#6366F1;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.ins-txt{font-size:13px;color:var(--color-text-primary);line-height:1.6}
+
+.ai-box{background:var(--color-background-secondary);border:.5px solid var(--color-border-tertiary);border-radius:14px;padding:1.25rem;margin-bottom:1.5rem}
+.ai-top{font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:#10B981;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ai-txt{font-size:14px;color:var(--color-text-primary);line-height:1.7}
+.ai-loading{color:var(--color-text-secondary);font-style:italic}
+
+.action-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:2rem}
+.btn-pdf{display:flex;align-items:center;gap:8px;background:#6366F1;color:#fff;border:none;border-radius:999px;padding:13px 24px;font-size:14px;font-weight:500;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 16px rgba(99,102,241,.3)}
+.btn-pdf:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(99,102,241,.4)}
+.btn-restart{background:transparent;border:1px solid var(--color-border-tertiary);border-radius:999px;padding:13px 24px;font-size:14px;color:var(--color-text-secondary);cursor:pointer;transition:border-color .15s}
+.btn-restart:hover{border-color:#6366F1;color:#6366F1}
+</style>
 </head>
 <body>
-  <div class="container" id="quiz">
-    <h1>Teste Vocacional</h1>
-    <div id="pergunta" class="question"></div>
-    <div id="respostas" class="options"></div>
+<div class="app">
+
+<!-- WELCOME -->
+<div class="screen active" id="s-welcome">
+  <div class="hero">
+    <span class="hero-emoji">🧭</span>
+    <h1>Descubra seu perfil vocacional</h1>
+    <p>Responda 20 perguntas e receba análise completa das suas aptidões, carreiras ideais e insights personalizados com IA.</p>
+    <button class="start-btn" onclick="startTest()">Começar teste →</button>
   </div>
-
-  <div class="container result" id="resultado" style="display:none">
-    <h2 id="tituloResultado"></h2>
-    <img id="imgResultado" src="" alt="Área relacionada" />
-    <div class="profissoes" id="listaProfissoes"></div>
-    <button id="restart" onclick="reiniciarTeste()">Reiniciar Teste</button>
+  <div class="feat-row">
+    <div class="feat"><span>🎨</span><p>Botões coloridos e interativos</p></div>
+    <div class="feat"><span>🤖</span><p>Análise personalizada com IA</p></div>
+    <div class="feat"><span>📄</span><p>Baixe seu resultado em PDF</p></div>
   </div>
+</div>
 
-  <script>
-    const perguntas = [
-      {
-        texto: "O que você mais gosta de fazer no seu tempo livre?",
-        opcoes: [
-          { texto: "Resolver desafios e quebra-cabeças", area: "Exatas" },
-          { texto: "Conversar sobre ideias, histórias e pessoas", area: "Humanas" },
-          { texto: "Observar a natureza e entender o corpo humano", area: "Biológicas" },
-          { texto: "Desenhar, pintar, criar artes visuais", area: "Artes e Design" },
-          { texto: "Tocar instrumentos, cantar ou criar músicas", area: "Artística-Musical" }
-        ]
-      },
-      {
-        texto: "Qual dessas matérias você curte mais na escola?",
-        opcoes: [
-          { texto: "Matemática ou Física", area: "Exatas" },
-          { texto: "História ou Filosofia", area: "Humanas" },
-          { texto: "Biologia ou Química", area: "Biológicas" },
-          { texto: "Artes ou Desenho", area: "Artes e Design" },
-          { texto: "Música ou Educação Musical", area: "Artística-Musical" }
-        ]
-      },
-      {
-        texto: "Se você fosse fazer um trabalho em grupo, qual papel escolheria?",
-        opcoes: [
-          { texto: "Fazer cálculos e organizar dados", area: "Exatas" },
-          { texto: "Pesquisar e explicar as ideias", area: "Humanas" },
-          { texto: "Cuidar da parte científica", area: "Biológicas" },
-          { texto: "Criar a identidade visual e design", area: "Artes e Design" },
-          { texto: "Criar trilhas sonoras e jingles", area: "Artística-Musical" }
-        ]
-      }
-    ];
+<!-- QUIZ -->
+<div class="screen" id="s-quiz">
+  <div class="prog-wrap">
+    <div class="prog-top">
+      <span class="prog-label" id="prog-lbl">Pergunta 1 de 20</span>
+      <span class="prog-cat" id="prog-cat">Interesses</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="q-card">
+    <div class="q-num" id="q-num">PERGUNTA 1</div>
+    <div class="q-text" id="q-text"></div>
+    <div id="q-opts"></div>
+  </div>
+  <div class="nav-row">
+    <button class="btn-back" id="btn-back" onclick="prevQ()">← Anterior</button>
+    <button class="btn-next" id="btn-next" onclick="nextQ()">Próxima →</button>
+  </div>
+</div>
 
-    const profissoes = {
-      "Exatas": [
-        ["Engenheiro Civil", "Projeta e acompanha obras de infraestrutura."],
-        ["Analista de Sistemas", "Desenvolve sistemas e soluções digitais."],
-        ["Matemático", "Trabalha com cálculos, modelos e análises."],
-        ["Estatístico", "Analisa dados e interpreta informações."],
-        ["Físico", "Estuda fenômenos naturais e fórmulas."],
-        ["Engenheiro de Software", "Cria programas e aplicativos."],
-        ["Engenheiro Elétrico", "Trabalha com sistemas elétricos."],
-        ["Programador", "Cria códigos para soluções tecnológicas."],
-        ["Arquiteto", "Projeta espaços urbanos e edifícios."],
-        ["Cientista de Dados", "Analisa grandes volumes de dados."],
-        ["Engenheiro Mecânico", "Projeta máquinas e dispositivos."],
-        ["Economista", "Analisa mercados e tendências econômicas."],
-        ["Engenheiro de Produção", "Otimiza processos industriais."],
-        ["Piloto", "Comanda aviões e aeronaves."],
-        ["Astrônomo", "Estuda o universo e astros."],
-        ["Geólogo", "Estuda a composição da Terra e seus processos."],
-        ["Engenheiro Ambiental", "Cuida do meio ambiente em projetos."],
-        ["Desenvolvedor de Jogos", "Cria jogos digitais para entretenimento."],
-        ["Matemático Aplicado", "Aplica matemática para resolver problemas reais."],
-        ["Especialista em Robótica", "Desenvolve máquinas inteligentes."]
-      ],
-      "Humanas": [
-        ["Professor de História", "Ensina a evolução da humanidade."],
-        ["Advogado", "Defende causas e interpreta leis."],
-        ["Jornalista", "Escreve e investiga notícias."],
-        ["Sociólogo", "Estuda a sociedade e seus comportamentos."],
-        ["Psicólogo", "Trabalha com a mente humana."],
-        ["Filósofo", "Reflete sobre a existência e ética."],
-        ["Publicitário", "Cria campanhas e anúncios."],
-        ["Cientista Político", "Estuda o sistema político e eleitoral."],
-        ["Relações Públicas", "Cuida da imagem pública de empresas."],
-        ["Historiador", "Pesquisa e registra fatos do passado."],
-        ["Antropólogo", "Estuda culturas e origens humanas."],
-        ["Linguista", "Estuda os idiomas e suas estruturas."],
-        ["Editor", "Trabalha com revisão e publicação de textos."],
-        ["Tradutor", "Converte textos entre idiomas."],
-        ["Guia Turístico", "Conduz pessoas em roteiros culturais."],
-        ["Assistente Social", "Ajuda pessoas e comunidades."],
-        ["Psicopedagogo", "Apoia processos de aprendizagem."],
-        ["Mediador", "Resolve conflitos entre pessoas ou grupos."],
-        ["Escritor", "Cria histórias e textos literários."],
-        ["Analista de Políticas Públicas", "Avalia programas governamentais."]
-      ],
-      "Biológicas": [
-        ["Médico", "Cuida da saúde das pessoas."],
-        ["Enfermeiro", "Atende e acompanha pacientes."],
-        ["Biólogo", "Estuda os seres vivos."],
-        ["Farmacêutico", "Trabalha com medicamentos."],
-        ["Veterinário", "Cuida da saúde animal."],
-        ["Nutricionista", "Planeja dietas e alimentação."],
-        ["Fisioterapeuta", "Trabalha com reabilitação física."],
-        ["Dentista", "Cuida da saúde bucal."],
-        ["Psicólogo", "Trata distúrbios mentais."],
-        ["Pesquisador", "Desenvolve estudos científicos."],
-        ["Técnico em Análises Clínicas", "Realiza exames laboratoriais."],
-        ["Biomédico", "Trabalha com diagnósticos laboratoriais."],
-        ["Zootecnista", "Trabalha com produção animal."],
-        ["Geneticista", "Estuda hereditariedade e genes."],
-        ["Fonoaudiólogo", "Trabalha com voz e audição."],
-        ["Oceanógrafo", "Estuda oceanos e ambientes marinhos."],
-        ["Ecólogo", "Analisa relações entre organismos e ambiente."],
-        ["Microbiologista", "Estuda microrganismos e seus efeitos."],
-        ["Farmacologista", "Estuda os efeitos de remédios no corpo."],
-        ["Biotecnólogo", "Usa biologia para criar tecnologias."]
-      ],
-      "Artes e Design": [
-        ["Designer Gráfico", "Cria imagens e layouts visuais."],
-        ["Ilustrador", "Desenha personagens e cenas."],
-        ["Arquiteto", "Projeta construções com estética."],
-        ["Artista Visual", "Cria obras de arte visuais."],
-        ["Fotógrafo", "Captura imagens com criatividade."],
-        ["Cineasta", "Produz filmes e vídeos."],
-        ["Animador", "Cria animações digitais."],
-        ["Web Designer", "Desenvolve sites atrativos."],
-        ["Designer de Moda", "Cria roupas e estilos."],
-        ["Maquiador Artístico", "Cria looks criativos."],
-        ["Pintor", "Produz obras em tinta."],
-        ["Cenógrafo", "Cria cenários para eventos e TV."],
-        ["Escultor", "Molda obras em três dimensões."],
-        ["Grafiteiro", "Faz arte urbana em murais."],
-        ["Youtuber Criativo", "Cria conteúdo artístico para web."],
-        ["Diretor de Arte", "Coordena a parte visual de projetos."],
-        ["Iluminador", "Trabalha com iluminação para cenas."],
-        ["Designer de Produto", "Cria objetos funcionais e bonitos."],
-        ["Designer de Interiores", "Planeja ambientes internos."],
-        ["Storyboarder", "Cria roteiros visuais para filmes e animações."]
-      ],
-      "Artística-Musical": [
-        ["Músico", "Toca instrumentos ou canta."],
-        ["Compositor", "Cria letras e melodias."],
-        ["Produtor Musical", "Grava e edita músicas."],
-        ["Maestro", "Comanda orquestras."],
-        ["DJ", "Cria mixagens e trilhas."],
-        ["Cantor", "Interpreta músicas."],
-        ["Luthier", "Constrói instrumentos."],
-        ["Técnico de Som", "Opera equipamentos de áudio."],
-        ["Educador Musical", "Ensina música nas escolas."],
-        ["Compositor de Trilhas", "Cria músicas para filmes e jogos."],
-        ["Musicoterapeuta", "Trabalha com cura via música."],
-        ["Regente", "Lidera corais e bandas."],
-        ["Arranjador", "Adapta músicas para bandas."],
-        ["Instrumentista", "Especialista em instrumentos."],
-        ["Crítico Musical", "Analisa performances musicais."],
-        ["Produtor de Eventos", "Organiza shows e festivais."],
-        ["Técnico de Gravação", "Cuida da captação de áudio."],
-        ["Cantor Gospel", "Interpreta músicas religiosas."],
-        ["Dançarino", "Performances artísticas com dança."],
-        ["Coreógrafo", "Cria coreografias para shows e teatro."]
-      ]
-    };
+<!-- LOADING -->
+<div class="screen" id="s-loading">
+  <div class="load-center">
+    <div class="spinner"></div>
+    <p style="font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">Analisando seu perfil...</p>
+    <p style="font-size:13px;color:var(--color-text-secondary)">A IA está processando suas respostas</p>
+    <div class="load-steps">
+      <div class="load-step"><div class="sdot" id="d1"></div>Calculando aptidões</div>
+      <div class="load-step"><div class="sdot" id="d2"></div>Mapeando interesses</div>
+      <div class="load-step"><div class="sdot" id="d3"></div>Selecionando carreiras</div>
+      <div class="load-step"><div class="sdot" id="d4"></div>Gerando insights com IA</div>
+    </div>
+  </div>
+</div>
 
-    let indice = 0;
-    let respostas = [];
+<!-- RESULT -->
+<div class="screen" id="s-result">
+  <div class="profile-hero" id="ph">
+    <div class="ph-sub">Seu perfil vocacional</div>
+    <div class="ph-name" id="ph-name">—</div>
+    <div class="ph-desc" id="ph-desc">—</div>
+  </div>
+  <div class="sec"><div class="sec-title">Aptidões identificadas</div><div class="apt-grid" id="apt-grid"></div></div>
+  <div class="sec"><div class="sec-title">Carreiras recomendadas</div><div class="career-list" id="career-list"></div></div>
+  <div class="sec"><div class="sec-title">Seus pontos fortes</div><div id="ins-list"></div></div>
+  <div class="sec">
+    <div class="sec-title">Análise personalizada da IA</div>
+    <div class="ai-box">
+      <div class="ai-top"><div class="ai-dot"></div> Claude · Análise vocacional</div>
+      <div class="ai-txt ai-loading" id="ai-txt">Gerando sua análise personalizada...</div>
+    </div>
+  </div>
+  <div class="action-row">
+    <button class="btn-pdf" id="pdf-btn" onclick="downloadPDF()">📄 Baixar resultado em PDF</button>
+    <button class="btn-restart" onclick="restart()">↺ Refazer teste</button>
+  </div>
+</div>
 
-    function mostrarPergunta() {
-      const pergunta = perguntas[indice];
-      document.getElementById("pergunta").innerText = pergunta.texto;
-      const containerRespostas = document.getElementById("respostas");
-      containerRespostas.innerHTML = "";
-      pergunta.opcoes.forEach(opcao => {
-        const botao = document.createElement("button");
-        botao.innerText = opcao.texto;
-        botao.onclick = () => escolher(opcao.area);
-        containerRespostas.appendChild(botao);
-      });
-    }
+</div>
 
-    function escolher(area) {
-      respostas.push(area);
-      indice++;
-      if (indice < perguntas.length) {
-        mostrarPergunta();
-      } else {
-        mostrarResultado();
-      }
-    }
-
-    function mostrarResultado() {
-      document.getElementById("quiz").style.display = "none";
-      document.getElementById("resultado").style.display = "block";
-
-      const contagem = respostas.reduce((acc, area) => {
-        acc[area] = (acc[area] || 0) + 1;
-        return acc;
-      }, {});
-
-      const areaFinal = Object.entries(contagem).sort((a,b) => b[1]-a[1])[0][0];
-
-      document.getElementById("tituloResultado").innerText = `🌟 Sua vocação está em: ${areaFinal}!`;
-
-      // Caminho local da imagem
-     const areaToImagem = {
-  "Exatas": "exatas.jpg",
-  "Humanas": "humanas.jpg",
-  "Biológicas": "biologicas.jpg",
-  "Artes e Design": "artesedesign.jpg",
-  "Artística-Musical": "artisticamusical.jpg"
+<script>
+const PALETTES = [
+  ['#EC4899','#F59E0B','#10B981','#6366F1','#EF4444'],
+  ['#8B5CF6','#06B6D4','#F97316','#14B8A6','#EC4899'],
+  ['#3B82F6','#EF4444','#F59E0B','#10B981','#8B5CF6'],
+  ['#F97316','#6366F1','#14B8A6','#EC4899','#3B82F6'],
+  ['#10B981','#8B5CF6','#F59E0B','#EF4444','#06B6D4']
+];
+const SCALE_COLORS = ['#EF4444','#F97316','#F59E0B','#10B981','#6366F1'];
+const CAT_COLORS = {
+  'Interesses':'#6366F1','Comportamento':'#EC4899','Aptidões':'#10B981','Valores':'#F59E0B'
 };
-const imagemPath = `imagens/${areaToImagem[areaFinal]}`;
 
+const questions = [
+  {text:"Quando você tem tempo livre, o que mais te atrai fazer?",cat:"Interesses",type:"opt",
+   opts:["Ler, aprender ou pesquisar algo novo","Criar algo com as mãos ou artisticamente","Ajudar ou conversar com pessoas","Resolver problemas lógicos ou matemáticos","Organizar, planejar ou liderar algo"],
+   sc:[{A:3},{B:3},{C:3},{D:3},{E:3}]},
+  {text:"Em um projeto em grupo, qual papel você naturalmente assume?",cat:"Comportamento",type:"opt",
+   opts:["Pesquisar e trazer as informações","Criar e trazer ideias visuais","Mediar conflitos e motivar o time","Estruturar a lógica e resolver problemas","Organizar o cronograma e liderar"],
+   sc:[{A:3},{B:3},{C:3},{D:3},{E:3}]},
+  {text:"O quanto você gosta de trabalhar com pessoas e se relacionar?",cat:"Aptidões",type:"scale",
+   labs:["Prefiro sozinho","Adoro equipes"],dim:"social"},
+  {text:"O quanto você se identifica com atividades artísticas e criativas?",cat:"Aptidões",type:"scale",
+   labs:["Não me identifico","Identifico muito"],dim:"criativo"},
+  {text:"Qual dessas situações te deixaria mais satisfeito(a)?",cat:"Valores",type:"opt",
+   opts:["Publicar uma descoberta científica","Criar uma obra de arte reconhecida","Ajudar alguém a superar uma dificuldade","Desenvolver um sistema que resolve um grande problema","Liderar uma empresa de sucesso"],
+   sc:[{A:3},{B:3},{C:3},{D:3},{E:3}]},
+  {text:"Como você prefere tomar decisões?",cat:"Comportamento",type:"opt",
+   opts:["Com dados e análise racional","Pela intuição e feeling","Ouvindo o que as pessoas precisam","Testando hipóteses logicamente","Pesando riscos e benefícios estrategicamente"],
+   sc:[{A:3},{B:3},{C:3},{D:3},{E:3}]},
+  {text:"O quanto você gosta de análises lógicas, dados e matemática?",cat:"Aptidões",type:"scale",
+   labs:["Não curto muito","Adoro isso"],dim:"analitico"},
+  {text:"Qual dessas áreas te desperta mais curiosidade?",cat:"Interesses",type:"opt",
+   opts:["Ciência, tecnologia e inovação","Artes, design e expressão","Saúde, bem-estar e comportamento humano","Negócios, economia e empreendedorismo","Natureza, meio ambiente e sustentabilidade"],
+   sc:[{A:3},{B:3},{C:3},{D:3},{E:3}]},
+  {text:"Como você se sente ao ensinar ou explicar algo para outras pessoas?",cat:"Comportamento",type:"opt",
+   opts:["Amo isso, me realizo ensinando","Gosto, mas prefiro criar a ensinar","É ok, mas prefiro outras atividades","Faço quando necessário, não é meu forte","Prefiro aprender a ensinar"],
+   sc:[{social:3},{social:1},{social:0},{social:0},{social:0}]},
+  {text:"O quanto você se importa com impacto social e causas humanitárias?",cat:"Valores",type:"scale",
+   labs:["Não é prioridade","É fundamental pra mim"],dim:"social"},
+  {text:"Como você se sente diante de desafios técnicos complexos?",cat:"Comportamento",type:"opt",
+   opts:["Fico animado(a), adoro resolver!","Enfrento quando preciso, mas prefiro criar","Peço ajuda para especialistas","Depende do tipo de desafio","Prefiro desafios estratégicos a técnicos"],
+   sc:[{analitico:3},{criativo:1},{social:1},{analitico:1},{lideranca:2}]},
+  {text:"Qual ambiente de trabalho te parece mais ideal?",cat:"Valores",type:"opt",
+   opts:["Laboratório ou escritório de pesquisa","Estúdio criativo ou agência","Hospital, escola ou espaço social","Startup ou empresa de tecnologia","Escritório corporativo ou minha empresa"],
+   sc:[{A:3},{B:3},{C:3},{D:3},{E:3}]},
+  {text:"O quanto você gosta de liderar e tomar decisões estratégicas?",cat:"Aptidões",type:"scale",
+   labs:["Prefiro ser operacional","Amo liderar e decidir"],dim:"lideranca"},
+  {text:"O que mais te motiva no trabalho?",cat:"Valores",type:"opt",
+   opts:["Descobrir e aprender coisas novas","Expressar minha criatividade","Fazer diferença na vida das pessoas","Construir algo grande ou inovar","Crescer profissionalmente e ganhar bem"],
+   sc:[{A:3},{B:3},{C:3},{D:3},{E:3}]},
+  {text:"Como você reage quando precisa escrever ou comunicar ideias?",cat:"Aptidões",type:"opt",
+   opts:["Adoro escrever e me comunico bem","Prefiro comunicar visualmente","Gosto de falar e apresentar em grupos","Me saio melhor com dados e relatórios","Comunico bem quando a causa me motiva"],
+   sc:[{A:2},{B:3},{social:3},{analitico:2},{social:2}]},
+  {text:"O quanto você gosta de tecnologia e ferramentas digitais?",cat:"Interesses",type:"scale",
+   labs:["Uso o básico","Muito ligado(a) em tecnologia"],dim:"analitico"},
+  {text:"Qual dessas atividades você faria mesmo sem receber?",cat:"Valores",type:"opt",
+   opts:["Pesquisar e escrever sobre algo que amo","Desenhar, criar ou produzir conteúdo","Voluntariar em causas sociais","Programar, desenvolver ou construir sistemas","Empreender um negócio próprio"],
+   sc:[{A:3},{B:3},{social:3},{D:3},{lideranca:3}]},
+  {text:"Como você prefere aprender algo novo?",cat:"Comportamento",type:"opt",
+   opts:["Lendo e estudando profundamente","Experimentando e criando","Conversando e aprendendo com pessoas","Praticando e resolvendo problemas","Planejando e depois executando"],
+   sc:[{A:2},{B:2},{social:2},{analitico:2},{lideranca:2}]},
+  {text:"Qual frase descreve melhor seu sonho profissional?",cat:"Valores",type:"opt",
+   opts:["Ser referência em minha área de conhecimento","Criar algo que inspire e encante as pessoas","Transformar vidas e contribuir com a sociedade","Construir produtos ou sistemas inovadores","Liderar uma organização de impacto"],
+   sc:[{A:3},{B:3},{C:3},{D:3},{lideranca:3}]},
+  {text:"Se pudesse mudar algo no mundo com sua carreira, o que escolheria?",cat:"Interesses",type:"opt",
+   opts:["Avançar o conhecimento científico e tecnológico","Tornar o mundo mais belo e criativo","Reduzir sofrimento e desigualdade humana","Criar soluções inovadoras e eficientes","Construir empresas que gerem prosperidade"],
+   sc:[{A:3},{B:3},{C:3},{D:3},{E:3}]}
+];
 
-      const imgResultado = document.getElementById("imgResultado");
-      imgResultado.src = imagemPath;
-      imgResultado.alt = `Imagem relacionada à área ${areaFinal}`;
+let cur=0, answers=new Array(questions.length).fill(null);
+let sc={A:0,B:0,C:0,D:0,E:0,social:0,criativo:0,analitico:0,lideranca:0};
+let resultData={};
 
-      const lista = document.getElementById("listaProfissoes");
-      lista.innerHTML = "";
-      profissoes[areaFinal].forEach(([nome, desc]) => {
-        const span = document.createElement("span");
-        span.innerText = nome;
-        const tooltip = document.createElement("div");
-        tooltip.className = "tooltip";
-        tooltip.innerText = desc;
-        span.appendChild(tooltip);
-        lista.appendChild(span);
-      });
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function startTest(){show('s-quiz');renderQ(0)}
+
+function getPalette(idx){return PALETTES[idx%PALETTES.length]}
+
+function renderQ(idx){
+  const q=questions[idx];
+  document.getElementById('prog-lbl').textContent=`Pergunta ${idx+1} de ${questions.length}`;
+  const catEl=document.getElementById('prog-cat');
+  catEl.textContent=q.cat;
+  catEl.style.background=CAT_COLORS[q.cat]||'#6366F1';
+  document.getElementById('q-num').textContent=`PERGUNTA ${idx+1}`;
+  document.getElementById('q-text').textContent=q.text;
+  document.getElementById('prog-fill').style.width=((idx/questions.length)*100)+'%';
+  document.getElementById('prog-fill').style.background=CAT_COLORS[q.cat]||'#6366F1';
+  document.getElementById('btn-back').style.visibility=idx===0?'hidden':'visible';
+
+  const opts=document.getElementById('q-opts');
+  opts.innerHTML='';
+
+  if(q.type==='opt'){
+    const pal=getPalette(idx);
+    const wrap=document.createElement('div');wrap.className='opts-grid';
+    q.opts.forEach((o,i)=>{
+      const b=document.createElement('button');
+      b.className='opt-btn'+(answers[idx]===i?' selected':'');
+      b.style.background=pal[i%pal.length];
+      b.textContent=o;
+      b.onclick=()=>selOpt(idx,i,pal[i%pal.length]);
+      wrap.appendChild(b);
+    });
+    opts.appendChild(wrap);
+  } else {
+    const wrap=document.createElement('div');
+    const row=document.createElement('div');row.className='scale-row';
+    for(let v=1;v<=5;v++){
+      const b=document.createElement('button');
+      b.className='scale-btn'+(answers[idx]===v?' selected':'');
+      b.style.background=SCALE_COLORS[v-1];
+      b.textContent=v;
+      b.onclick=()=>selScale(idx,v);
+      row.appendChild(b);
     }
+    const labs=document.createElement('div');labs.className='scale-labs';
+    labs.innerHTML=`<span>${q.labs[0]}</span><span>${q.labs[1]}</span>`;
+    wrap.appendChild(row);wrap.appendChild(labs);
+    opts.appendChild(wrap);
+  }
+  updateNext();
+}
 
-    function reiniciarTeste() {
-      indice = 0;
-      respostas = [];
-      document.getElementById("quiz").style.display = "block";
-      document.getElementById("resultado").style.display = "none";
-      mostrarPergunta();
-    }
+function selOpt(qi,oi){
+  answers[qi]=oi;
+  document.querySelectorAll('.opt-btn').forEach((b,i)=>b.classList.toggle('selected',i===oi));
+  updateNext();
+}
+function selScale(qi,v){
+  answers[qi]=v;
+  document.querySelectorAll('.scale-btn').forEach((b,i)=>b.classList.toggle('selected',i+1===v));
+  updateNext();
+}
+function updateNext(){
+  const b=document.getElementById('btn-next');
+  b.classList.toggle('on',answers[cur]!==null);
+  b.textContent=cur===questions.length-1?'Ver resultado →':'Próxima →';
+}
+function nextQ(){if(answers[cur]===null)return;if(cur===questions.length-1){calcScores();showLoading();return;}cur++;renderQ(cur)}
+function prevQ(){if(cur===0)return;cur--;renderQ(cur)}
 
-    mostrarPergunta();
-  </script>
+function calcScores(){
+  sc={A:0,B:0,C:0,D:0,E:0,social:0,criativo:0,analitico:0,lideranca:0};
+  questions.forEach((q,i)=>{
+    const a=answers[i];if(a===null)return;
+    if(q.type==='opt'){const s=q.sc[a];if(s)Object.keys(s).forEach(k=>{if(sc[k]!==undefined)sc[k]+=s[k]})}
+    else{if(sc[q.dim]!==undefined)sc[q.dim]+=a}
+  });
+}
+
+function showLoading(){
+  show('s-loading');
+  ['d1','d2','d3','d4'].forEach((d,i)=>setTimeout(()=>document.getElementById(d).classList.add('ok'),500+i*700));
+  setTimeout(()=>buildResult(),3500);
+}
+
+function getProfile(){
+  const tl=['A','B','C','D','E'].reduce((a,b)=>sc[a]>=sc[b]?a:b);
+  const td=['social','criativo','analitico','lideranca'].reduce((a,b)=>sc[a]>=sc[b]?a:b);
+  const profiles={
+    A:{name:'Pesquisador & Pensador',desc:'Você é movido(a) pela curiosidade intelectual e pelo prazer de aprender. Tem habilidade para análise profunda, escrita e busca de conhecimento. Destaca-se em ambientes que valorizam o rigor e a inovação intelectual.',grad:'#4F46E5,#7C3AED'},
+    B:{name:'Criativo & Expressivo',desc:'Sua mente pensa em imagens, conceitos e possibilidades únicas. Você se realiza criando, expressando ideias e dando forma ao que outros não enxergam. Ambientes criativos são seu habitat natural.',grad:'#EC4899,#F97316'},
+    C:{name:'Humanista & Cuidador',desc:'Você encontra significado nas conexões humanas e em fazer diferença na vida das pessoas. Tem empatia natural, escuta ativa e vocação para cuidar, educar e transformar vidas.',grad:'#10B981,#06B6D4'},
+    D:{name:'Construtor & Inovador',desc:'Você pensa em sistemas, soluções e possibilidades técnicas. Tem capacidade analítica aguçada e gosta de criar coisas que funcionam. Tecnologia e inovação são seus campos de jogo.',grad:'#3B82F6,#6366F1'},
+    E:{name:'Líder & Estrategista',desc:'Você tem visão, capacidade de influenciar e gosta de estar no comando. Pensa em grande escala, motiva pessoas e tem instinto para negócios e estratégia.',grad:'#F59E0B,#EF4444'}
+  };
+  if(sc[td]>sc[tl]*0.7){if(td==='social')return profiles.C;if(td==='criativo')return profiles.B;if(td==='analitico')return profiles.D;if(td==='lideranca')return profiles.E}
+  return profiles[tl];
+}
+
+function getApts(){
+  return [
+    {lbl:'Habilidade Social',pct:Math.min(100,Math.round((sc.social/20)*100)),color:'#10B981'},
+    {lbl:'Criatividade',pct:Math.min(100,Math.round((sc.criativo/20)*100)),color:'#EC4899'},
+    {lbl:'Raciocínio Analítico',pct:Math.min(100,Math.round((sc.analitico/20)*100)),color:'#3B82F6'},
+    {lbl:'Liderança',pct:Math.min(100,Math.round((sc.lideranca/15)*100)),color:'#F59E0B'},
+    {lbl:'Visão Científica',pct:Math.min(100,Math.round((sc.A/18)*100)),color:'#6366F1'},
+    {lbl:'Expressão Artística',pct:Math.min(100,Math.round((sc.B/18)*100)),color:'#F97316'}
+  ].sort((a,b)=>b.pct-a.pct);
+}
+
+function getCareers(){
+  const tl=['A','B','C','D','E'].reduce((a,b)=>sc[a]>=sc[b]?a:b);
+  const all={
+    A:[{i:'🔬',n:'Cientista / Pesquisador',d:'Pesquisa em universidades, institutos ou empresas de P&D.',t:['Mestrado/Doutorado','Inovação','Intelectual'],m:'h'},
+       {i:'📚',n:'Professor / Educador',d:'Ensino superior, cursos e formação de pessoas em sua área.',t:['Impacto social','Conhecimento','Flexibilidade'],m:'h'},
+       {i:'📰',n:'Jornalista / Escritor',d:'Produção de conteúdo, reportagem e redação editorial.',t:['Comunicação','Criatividade','Análise'],m:'m'}],
+    B:[{i:'🎨',n:'Designer Gráfico / UX',d:'Criação visual, interfaces digitais e identidade de marcas.',t:['Alta demanda','Portfólio','Digital'],m:'h'},
+       {i:'🎬',n:'Produtor de Conteúdo',d:'Vídeos, podcasts, redes sociais, cinema e publicidade.',t:['Criatividade','Tecnologia','Mercado em expansão'],m:'h'},
+       {i:'✏️',n:'Arquiteto / Designer de Interiores',d:'Criação de espaços funcionais e esteticamente ricos.',t:['Técnico + Criativo','Longo prazo','Prestígio'],m:'m'}],
+    C:[{i:'🩺',n:'Psicólogo / Terapeuta',d:'Saúde mental, clínica, organizacional ou educacional.',t:['Crescimento acelerado','Vocação','Impacto real'],m:'h'},
+       {i:'👩‍🏫',n:'Pedagogo / Educador Social',d:'Formação de crianças, jovens e comunidades vulneráveis.',t:['Missão social','Educação','Transformação'],m:'h'},
+       {i:'🏥',n:'Assistente Social / Enfermeiro',d:'Cuidado direto com pessoas em situação de vulnerabilidade.',t:['Empatia','Prático','Alto impacto'],m:'m'}],
+    D:[{i:'💻',n:'Desenvolvedor de Software',d:'Criação de sistemas, apps, APIs e soluções digitais.',t:['Alta demanda','Remoto','Salário competitivo'],m:'h'},
+       {i:'📊',n:'Cientista de Dados / IA',d:'Análise de dados, machine learning e inteligência artificial.',t:['Futuro do mercado','Técnico','Impacto'],m:'h'},
+       {i:'⚙️',n:'Engenheiro',d:'Projetos técnicos de grande escala e infraestrutura.',t:['Técnico','Sólido','Versátil'],m:'m'}],
+    E:[{i:'🚀',n:'Empreendedor / Fundador',d:'Criação e liderança de startups ou negócios próprios.',t:['Alto risco/retorno','Liderança total','Inovação'],m:'h'},
+       {i:'📈',n:'Gestor de Projetos / CEO',d:'Liderança de equipes, estratégia e resultado organizacional.',t:['Liderança','Estratégia','Crescimento'],m:'h'},
+       {i:'⚖️',n:'Advogado / Consultor Estratégico',d:'Consultoria, direito empresarial e tomada de decisão.',t:['Prestígio','Análise','Influência'],m:'m'}]
+  };
+  return all[tl]||all.D;
+}
+
+function getInsights(apts){
+  const t=apts.slice(0,2);
+  return [
+    {lbl:'Seu maior talento',txt:`Você demonstra alta habilidade em "${t[0].lbl}" (${t[0].pct}%), uma vantagem competitiva significativa no mercado atual.`},
+    {lbl:'Combinação poderosa',txt:`A junção de "${t[0].lbl}" com "${t[1].lbl}" cria um perfil raro e muito valorizado em carreiras multidisciplinares.`},
+    {lbl:'Ponto de atenção',txt:`Fortalecer suas habilidades de menor pontuação pode abrir portas para carreiras ainda mais abrangentes e bem remuneradas.`}
+  ];
+}
+
+function buildResult(){
+  const profile=getProfile();
+  const apts=getApts();
+  const careers=getCareers();
+  const insights=getInsights(apts);
+  resultData={profile,apts,careers,insights};
+
+  const ph=document.getElementById('ph');
+  ph.style.background=`linear-gradient(135deg,${profile.grad})`;
+  document.getElementById('ph-name').textContent=profile.name;
+  document.getElementById('ph-desc').textContent=profile.desc;
+
+  const ag=document.getElementById('apt-grid');ag.innerHTML='';
+  apts.forEach(a=>{
+    ag.innerHTML+=`<div class="apt-card"><div class="apt-pct" style="color:${a.color}">${a.pct}%</div><div class="apt-lbl">${a.lbl}</div><div class="apt-bar"><div class="apt-fill" style="width:${a.pct}%;background:${a.color}"></div></div></div>`;
+  });
+
+  const cl=document.getElementById('career-list');cl.innerHTML='';
+  careers.forEach(c=>{
+    cl.innerHTML+=`<div class="career-card"><div class="ci">${c.i}</div><div style="flex:1;min-width:0"><div class="cn">${c.n}</div><div class="cd">${c.d}</div><div class="ctags">${c.t.map(t=>`<span class="ctag">${t}</span>`).join('')}</div></div><span class="match ${c.m==='h'?'mh':'mm'}">${c.m==='h'?'★ Alto fit':'◇ Bom fit'}</span></div>`;
+  });
+
+  const il=document.getElementById('ins-list');il.innerHTML='';
+  insights.forEach(ins=>{
+    il.innerHTML+=`<div class="insight"><div class="ins-lbl">${ins.lbl}</div><div class="ins-txt">${ins.txt}</div></div>`;
+  });
+
+  show('s-result');
+  callAI(profile,apts,careers);
+}
+
+async function callAI(profile,apts,careers){
+  const top3=apts.slice(0,3).map(a=>`${a.lbl}: ${a.pct}%`).join(', ');
+  const careerNames=careers.map(c=>c.n).join(', ');
+  const prompt=`Você é um orientador vocacional especializado. Escreva uma análise personalizada e motivadora em português do Brasil.
+
+Perfil: ${profile.name}
+Descrição: ${profile.desc}
+Aptidões principais: ${top3}
+Carreiras recomendadas: ${careerNames}
+
+Escreva exatamente 3 parágrafos curtos (máx 3 linhas cada):
+1. Análise do perfil e o que ele revela sobre a pessoa
+2. Por que as carreiras fazem sentido para este perfil
+3. Conselho motivacional concreto para o próximo passo
+
+Seja direto, caloroso e inspirador. Apenas os 3 parágrafos, sem marcadores ou títulos.`;
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+    const d=await r.json();
+    const txt=d.content?.map(b=>b.text||'').join('')||'Análise não disponível.';
+    resultData.aiText=txt;
+    const el=document.getElementById('ai-txt');
+    el.classList.remove('ai-loading');
+    el.textContent=txt;
+  }catch(e){
+    resultData.aiText='Não foi possível carregar a análise da IA neste momento.';
+    document.getElementById('ai-txt').textContent=resultData.aiText;
+  }
+}
+
+function downloadPDF(){
+  const btn=document.getElementById('pdf-btn');
+  btn.textContent='⏳ Gerando PDF...';btn.disabled=true;
+
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,M=20,CW=W-M*2;
+  let y=M;
+
+  function hex2rgb(hex){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return[r,g,b]}
+
+  // Header gradient simulation
+  const grad=resultData.profile.grad.split(',');
+  const c1=hex2rgb(grad[0].trim());
+  doc.setFillColor(...c1);
+  doc.roundedRect(M,y,CW,45,4,4,'F');
+
+  // Profile
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8);doc.setTextColor(200,200,255);
+  doc.text('SEU PERFIL VOCACIONAL',M+6,y+10);
+  doc.setFontSize(18);doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');
+  doc.text(resultData.profile.name,M+6,y+20);
+  doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(220,220,255);
+  const descLines=doc.splitTextToSize(resultData.profile.desc,CW-12);
+  doc.text(descLines,M+6,y+28);
+  y+=52;
+
+  // Date
+  doc.setFontSize(8);doc.setTextColor(150,150,150);
+  doc.text(`Gerado em ${new Date().toLocaleDateString('pt-BR')}`,M,y);
+  y+=8;
+
+  // Aptitudes
+  doc.setFontSize(12);doc.setTextColor(30,30,30);doc.setFont('helvetica','bold');
+  doc.text('Aptidoes Identificadas',M,y);
+  doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);
+  doc.line(M,y+2,M+CW,y+2);
+  y+=8;
+
+  const aptCols=2,aptW=(CW-5)/2;
+  resultData.apts.forEach((a,i)=>{
+    const col=i%2,row=Math.floor(i/2);
+    const x=M+col*(aptW+5),ay=y+row*18;
+    doc.setFillColor(245,245,250);
+    doc.roundedRect(x,ay,aptW,14,2,2,'F');
+    const ac=hex2rgb(a.color);
+    doc.setFont('helvetica','bold');doc.setFontSize(14);doc.setTextColor(...ac);
+    doc.text(`${a.pct}%`,x+4,ay+9);
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(80,80,80);
+    doc.text(a.lbl,x+20,ay+6);
+    doc.setFillColor(...ac);
+    doc.roundedRect(x+4,ay+10,Math.round((aptW-8)*a.pct/100),2,1,1,'F');
+    doc.setFillColor(230,230,230);
+  });
+  y+=Math.ceil(resultData.apts.length/2)*18+6;
+
+  // Careers
+  doc.setFontSize(12);doc.setTextColor(30,30,30);doc.setFont('helvetica','bold');
+  doc.text('Carreiras Recomendadas',M,y);
+  doc.line(M,y+2,M+CW,y+2);
+  y+=8;
+  resultData.careers.forEach(c=>{
+    doc.setFillColor(248,248,252);
+    doc.roundedRect(M,y,CW,18,2,2,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(30,30,30);
+    doc.text(c.i.replace(/[\u{1F300}-\u{1FAFF}]/gu,'').trim()||'',M+3,y+7);
+    doc.text(c.n,M+10,y+7);
+    const matchC=c.m==='h'?[5,100,60]:[150,100,10];
+    doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...matchC);
+    doc.text(c.m==='h'?'ALTO FIT':'BOM FIT',M+CW-20,y+7);
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(90,90,90);
+    const dl=doc.splitTextToSize(c.d,CW-14);
+    doc.text(dl[0],M+10,y+13);
+    y+=21;
+  });
+  y+=2;
+
+  // Insights
+  if(y>240){doc.addPage();y=M}
+  doc.setFontSize(12);doc.setTextColor(30,30,30);doc.setFont('helvetica','bold');
+  doc.text('Seus Pontos Fortes',M,y);
+  doc.line(M,y+2,M+CW,y+2);
+  y+=8;
+  resultData.insights.forEach(ins=>{
+    doc.setFillColor(240,240,252);
+    doc.roundedRect(M,y,CW,20,2,2,'F');
+    doc.setFillColor(99,102,241);doc.rect(M,y,1.5,20,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(80,60,200);
+    doc.text(ins.lbl.toUpperCase(),M+5,y+6);
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(40,40,40);
+    const tl=doc.splitTextToSize(ins.txt,CW-10);
+    doc.text(tl.slice(0,2),M+5,y+12);
+    y+=23;
+  });
+
+  // AI Analysis
+  if(y>220){doc.addPage();y=M}
+  y+=2;
+  doc.setFontSize(12);doc.setTextColor(30,30,30);doc.setFont('helvetica','bold');
+  doc.text('Analise da Inteligencia Artificial',M,y);
+  doc.line(M,y+2,M+CW,y+2);
+  y+=8;
+  const aiT=resultData.aiText||'Análise não disponível.';
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(40,40,40);
+  const aiLines=doc.splitTextToSize(aiT,CW);
+  aiLines.forEach(ln=>{
+    if(y>270){doc.addPage();y=M}
+    doc.text(ln,M,y);y+=5.5;
+  });
+
+  // Footer
+  const pages=doc.getNumberOfPages();
+  for(let p=1;p<=pages;p++){
+    doc.setPage(p);
+    doc.setFontSize(7);doc.setTextColor(180,180,180);
+    doc.text(`Teste Vocacional com IA  |  Pagina ${p} de ${pages}`,W/2,285,{align:'center'});
+  }
+
+  doc.save('meu-perfil-vocacional.pdf');
+  btn.textContent='📄 Baixar resultado em PDF';btn.disabled=false;
+}
+
+function restart(){cur=0;answers=new Array(questions.length).fill(null);resultData={};show('s-welcome')}
+</script>
 </body>
 </html>
